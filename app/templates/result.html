@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="../static/style_result.css">
+</head>
+<body>
+    <div class="result-container">
+        <h1>시험 결과</h1>
+        <p class="info">사원번호: <span>{{ userid }}</span></p>
+        <p class="info">이름: <span>{{ name }}</span></p>
+        <p class="score">점수: <span>{{ score }}</span></p>
+    </div>
+</body>
+<script>
+    // 스택 추가
+    history.pushState(null, null, location.href); 
+
+    // 뒤로라기 이벤트감지 -> 현재페이지로 이동
+    window.onpopstate = function() { 
+        history.go(1); 
+    }
+</script>
+</html>

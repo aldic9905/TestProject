@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="../static/style_login.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>시험</h1>
+        <form id="login" onsubmit="validateForm(event)">
+            <div class="input-group">
+                <label for="userid">사원 번호:</label>
+                <input type="text" id="userid" name="userid" placeholder="사원 번호 입력">
+            </div>
+            <div class="input-group">
+                <label for="name">이름:</label>
+                <input type="text" id="name" name="name" placeholder="이름 입력">
+            </div>
+            <div class="input-group">
+                <label for="password">비밀번호:</label>
+                <input type="text" id="password" name="password" placeholder="비밀번호 입력">
+            </div>
+            <button type="submit">로그인</button>
+        </form>
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        clearAllCookies(); // 쿠키 초기화
+        localStorage.removeItem("startTime"); // 로컬 스토리지 초기화
+    });
+
+    function validateForm(event) {
+            event.preventDefault(); // 폼 기본 제출 동작 방지
+            const password = document.getElementById("password").value;
+            const name = document.getElementById("name").value;
+            const userid = document.getElementById("userid").value;
+
+            // 비밀번호 검증
+            if (password === "1234") {
+                setCookie("userid", userid, 7); // 쿠키 설정
+                setCookie("name", name, 7);     // 쿠키 설정
+                // 비밀번호가 맞으면 /exam 페이지로 이동
+                window.location.href = "/exam?page=1";
+            } else {
+                // 비밀번호가 틀리면 경고창 표시
+                alert("유효하지 않은 코드입니다.");
+                document.getElementById("password").value = ""; // 입력 필드 초기화
+            }
+        }
+
+    function setCookie(name, value, days) {
+        const date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+        document.cookie = `${name}=${encodeURIComponent(value)};expires=${date.toUTCString()};path=/`;
+    }
+
+    function clearAllCookies() {
+    const cookies = document.cookie.split(";"); // 모든 쿠키를 가져오기
+
+    for (const cookie of cookies) {
+        const cookieName = cookie.split("=")[0].trim(); // 쿠키 이름 추출
+        document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; // 만료일을 과거로 설정
+    }
+}
+</script>
+</html>
