@@ -44,7 +44,7 @@ async def login(request: Request, response: Response):
 
     template_response = templates.TemplateResponse("login.html", {
         "request": request,
-        "title": "Login"
+        "title": "로그인"
     })
 
     # Response 헤더를 TemplateResponse에 복사
@@ -63,18 +63,19 @@ async def result(request: Request, response: Response):
 
     data = json.loads(selected_str)
     user_answer_list = list(data.values())
-    answer_list = json.loads(redis_client.get(f"user:{userid}:answers"))
+    answer_list = json.loads(redis_client.get(f"user:{userid}:question"))["answer_list"]
+    question_list = json.loads(redis_client.get(f"user:{userid}:question"))["question_list"]
 
     score=0
     for i,j in zip(user_answer_list, answer_list):
         if i==j:
             score += 5
 
-    save_user_info(userid, user_answer_list, score)
+    save_user_info(userid, question_list, answer_list, user_answer_list, score)
 
     template_response = templates.TemplateResponse("result.html", {
         "request": request,
-        "title": "Result",
+        "title": "결과",
         "userid": userid,
         "name": decoded_name,
         "score": score,
@@ -105,17 +106,18 @@ async def admin_page(request: Request, user_id: str):
             "request": request,
             "user_id": user_id,
             "results": [],
-            "score": "No data available"
+            "score": "정보 없음"
         })
 
     # JSON 데이터 파싱
     user_result = json.loads(user_data)
     question_list = user_result["question_list"]
+    answer_list = user_result["answer_list"]
     user_answer_list = user_result["user_answer_list"]
     score = user_result["score"]
 
     # 결과 묶기
-    results = zip(question_list, user_answer_list)
+    results = zip(question_list, answer_list, user_answer_list)
 
     # 템플릿 렌더링
     return templates.TemplateResponse("admin_page.html", {

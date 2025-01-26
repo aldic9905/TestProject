@@ -4,31 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1, h2 { color: #333; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f4f4f4; }
-    </style>
+    <link rel="stylesheet" href="../static/style_admin.css">
 </head>
 <body>
-    <h1>Admin Page</h1>
-    <h2>User ID: {{ user_id }}</h2>
-
+    <h1>사원번호: {{ user_id }}</h1>
     <table>
         <tr>
-            <th>Question Number</th>
-            <th>User Answer</th>
+            <th>문제 번호</th>
+            <th>정답</th>
+            <th>사용자의 답</th>
         </tr>
-        {% for question, answer in results %}
+        {% for question, answer, user_answer in results %}
         <tr>
             <td>{{ question }}</td>
             <td>{{ answer }}</td>
+            <td>{{ user_answer }}</td>
         </tr>
         {% endfor %}
     </table>
 
-    <h2>Score: {{ score }}</h2>
+    <h1>점수: {{ score }}</h1>
 </body>
 </html>

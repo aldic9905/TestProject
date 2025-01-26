@@ -16,11 +16,11 @@
             <div class="navigation-buttons">
                 <form method="get" action="/exam">
                     <input type="hidden" name="page" value="{{ current_page - 1 }}">
-                    <button type="submit" {% if current_page <= 1 %}disabled{% endif %}>Previous Page</button>
+                    <button type="submit" {% if current_page <= 1 %}disabled{% endif %}>이전 문제</button>
                 </form>
                 <form method="get" action="/exam">
                     <input type="hidden" name="page" value="{{ current_page + 1 }}">
-                    <button type="submit" {% if current_page >= 20 %}disabled{% endif %}>Next Page</button>
+                    <button type="submit" {% if current_page >= 20 %}disabled{% endif %}>다음 문제</button>
                 </form>
             </div>
         </div>

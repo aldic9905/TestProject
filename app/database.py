@@ -60,12 +60,21 @@ def assign_questions_to_user(user_id):
         question_data["id"] = i
         redis_client.set(f"user:{user_id}:question:{i}", json.dumps(question_data))
     
-    redis_client.set(f"user:{user_id}:answers",json.dumps(answer_list))
+    save_user_question(user_id, question_list, answer_list)
     print(f"Questions assigned to user {user_id}")
 
-def save_user_info(user_id, question_list, user_answer_list, score):
+def save_user_question(user_id, question_list, answer_list):
+    user_questions = {
+        "question_list": question_list,
+        "answer_list": answer_list
+    }
+    redis_client.set(f"user:{user_id}:question", json.dumps(user_questions))
+    print(f"{user_id} User question saved.")
+
+def save_user_info(user_id, question_list, answer_list, user_answer_list, score):
     user_result = {
         "question_list": question_list,
+        "answer_list": answer_list,
         "user_answer_list": user_answer_list,
         "score": score
     }
