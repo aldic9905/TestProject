@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from app.database import redis_client
-from app.database import get_user_questions, assign_questions_to_user, cache_all_questions
+from app.database import get_user_questions, assign_questions_to_user, cache_all_questions, save_user_info
 from urllib.parse import unquote
 import json
 
@@ -18,7 +18,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 cache_all_questions()
 
 @app.get("/exam", response_class=HTMLResponse)
-async def exam(request: Request,response: Response, page: int = 1):
+async def exam(request: Request, page: int = 1):
     result = request.cookies.get("result")
     if result == "true":
         return RedirectResponse(url="/result")
@@ -70,6 +70,8 @@ async def result(request: Request, response: Response):
         if i==j:
             score += 5
 
+    save_user_info(userid, user_answer_list, score)
+
     template_response = templates.TemplateResponse("result.html", {
         "request": request,
         "title": "Result",
@@ -89,3 +91,36 @@ async def fetch_questions(user_id: str, question_id: int):
     """사용자 문제 데이터 반환 API"""
     question = get_user_questions(user_id,question_id)
     return {"question": question}
+
+@app.get("/favicon.ico")
+async def ignore_favicon():
+    return None
+
+@app.get("/user_result/{user_id}", response_class=HTMLResponse)
+async def admin_page(request: Request, user_id: str):
+    # Redis에서 사용자 데이터 가져오기
+    user_data = redis_client.get(f"user:{user_id}:result")
+    if not user_data:
+        return templates.TemplateResponse("admin_page.html", {
+            "request": request,
+            "user_id": user_id,
+            "results": [],
+            "score": "No data available"
+        })
+
+    # JSON 데이터 파싱
+    user_result = json.loads(user_data)
+    question_list = user_result["question_list"]
+    user_answer_list = user_result["user_answer_list"]
+    score = user_result["score"]
+
+    # 결과 묶기
+    results = zip(question_list, user_answer_list)
+
+    # 템플릿 렌더링
+    return templates.TemplateResponse("admin_page.html", {
+        "request": request,
+        "user_id": user_id,
+        "results": results,
+        "score": score
+    })

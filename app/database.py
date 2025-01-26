@@ -50,6 +50,8 @@ def assign_questions_to_user(user_id):
     question_list = selected_easy + selected_medium + selected_hard
     random.shuffle(question_list)  # 문제 순서 섞기
     
+
+
     answer_list=[]
     for question_id, i in zip(question_list, range(1,problem_count+1)):
         question = redis_client.get(f"question:{question_id}")
@@ -60,3 +62,12 @@ def assign_questions_to_user(user_id):
     
     redis_client.set(f"user:{user_id}:answers",json.dumps(answer_list))
     print(f"Questions assigned to user {user_id}")
+
+def save_user_info(user_id, question_list, user_answer_list, score):
+    user_result = {
+        "question_list": question_list,
+        "user_answer_list": user_answer_list,
+        "score": score
+    }
+    redis_client.set(f"user:{user_id}:result", json.dumps(user_result))
+    print(f"{user_id} User result saved.")
