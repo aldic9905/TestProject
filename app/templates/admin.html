@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="../static/style_admin.css">
+</head>
+<body>
+    <h1>사용자 결과 페이지</h1>
+
+    <!-- 드롭다운 메뉴 -->
+    <form method="get" action="/admin">
+        <p>응시 인원 : {{ user_ids|length }}</p>
+        <label for="user_select">사원 번호:</label>
+        <select id="user_select" name="user_id">
+            <option value="">-- 선택 --</option>
+            {% for uid in user_ids %}
+            <option value="{{ uid }}" {% if user_id == uid %}selected{% endif %}>{{ uid }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">검색</button>
+    </form>
+
+    <!-- 선택된 사용자 정보 표시 -->
+    {% if user_id %}
+        <h2>점수: {{ score }}</h2>
+        <table>
+            <tr>
+                <th>문제 번호</th>
+                <th>정답</th>
+                <th>사용자의 답</th>
+            </tr>
+            {% for question, answer, user_answer in results %}
+            <tr>
+                <td>{{ question }}</td>
+                <td>{{ answer }}</td>
+                <td>{{ user_answer }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+</html>

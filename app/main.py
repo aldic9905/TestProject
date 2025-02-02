@@ -56,8 +56,8 @@ async def login(request: Request, response: Response):
 @app.get("/result", response_class=HTMLResponse)
 async def result(request: Request, response: Response):
     response.set_cookie(key="result", value="true", max_age=3600)
-    userid = request.cookies.get("userid", "Guest")  # 기본값은 'Guest'
-    name = request.cookies.get("name", "Unknown")    # 기본값은 'Unknown'      # 기본값은 '0'
+    userid = request.cookies.get("userid", "None")  # 기본값은 'None'
+    name = request.cookies.get("name", "None")    # 기본값은 'None'    
     decoded_name = unquote(name)
     selected_str = unquote(request.cookies.get("selectedOptions", "[]"))
 
@@ -97,31 +97,36 @@ async def fetch_questions(user_id: str, question_id: int):
 async def ignore_favicon():
     return None
 
-@app.get("/user_result/{user_id}", response_class=HTMLResponse)
-async def admin_page(request: Request, user_id: str):
-    # Redis에서 사용자 데이터 가져오기
-    user_data = redis_client.get(f"user:{user_id}:result")
-    if not user_data:
-        return templates.TemplateResponse("admin_page.html", {
-            "request": request,
-            "user_id": user_id,
-            "results": [],
-            "score": "정보 없음"
-        })
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request, user_id: str = None):
+    # Redis에 저장된 모든 유저 ID 가져오기
+    keys = redis_client.keys("user:*:result")
+    user_ids = [key.decode("utf-8").split(":")[1] for key in keys]  # 바이트 데이터를 문자열로 변환
 
-    # JSON 데이터 파싱
-    user_result = json.loads(user_data)
-    question_list = user_result["question_list"]
-    answer_list = user_result["answer_list"]
-    user_answer_list = user_result["user_answer_list"]
-    score = user_result["score"]
+    # 선택된 사용자 데이터 가져오기
+    if user_id:
+        user_data = redis_client.get(f"user:{user_id}:result")
+        if user_data:
+            user_result = json.loads(user_data)
+            question_list = user_result["question_list"]
+            answer_list = user_result["answer_list"]
+            user_answer_list = user_result["user_answer_list"]
+            score = user_result["score"]
 
-    # 결과 묶기
-    results = zip(question_list, answer_list, user_answer_list)
+            # 결과 묶기
+            results = zip(question_list, answer_list, user_answer_list)
+        else:
+            results = []
+            score = "정보 없음"
+    else:
+        user_id = None
+        results = []
+        score = None
 
     # 템플릿 렌더링
-    return templates.TemplateResponse("admin_page.html", {
+    return templates.TemplateResponse("admin.html", {
         "request": request,
+        "user_ids": user_ids,
         "user_id": user_id,
         "results": results,
         "score": score
