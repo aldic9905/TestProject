@@ -32,3 +32,8 @@ th {
     background-color: #f4f4f4;
 }
 
+.wrong-answer {
+    background-color: red;
+    color: white;
+}
+

@@ -32,7 +32,7 @@
                 <th>사용자의 답</th>
             </tr>
             {% for question, answer, user_answer in results %}
-            <tr>
+            <tr {% if answer != user_answer %} class="wrong-answer" {% endif %}>
                 <td>{{ question }}</td>
                 <td>{{ answer }}</td>
                 <td>{{ user_answer }}</td>

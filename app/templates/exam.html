@@ -20,7 +20,7 @@
                 </form>
                 <form method="get" action="/exam">
                     <input type="hidden" name="page" value="{{ current_page + 1 }}">
-                    <button type="submit" {% if current_page >= 20 %}disabled{% endif %}>다음 문제</button>
+                    <button type="submit" {% if current_page >= 50 %}disabled{% endif %}>다음 문제</button>
                 </form>
             </div>
         </div>
@@ -29,13 +29,20 @@
         <div class="right-section">
             <p id="timer">남은 시간: </p>
             <div id="options-container">
-                {% for page in range(1, 21) %}
+                {% for page in range(1, 41) %}
                 <div class="option-row">
                     <a href="/exam?page={{ page }}">{{ page }}</a>
                     <p class="option" data-id="{{ page }}" data-option="1" onclick="selectOption(this)">①</p>
                     <p class="option" data-id="{{ page }}" data-option="2" onclick="selectOption(this)">②</p>
                     <p class="option" data-id="{{ page }}" data-option="3" onclick="selectOption(this)">③</p>
                     <p class="option" data-id="{{ page }}" data-option="4" onclick="selectOption(this)">④</p>
+                    <p class="option" data-id="{{ page }}" data-option="5" onclick="selectOption(this)">⑤</p>
+                </div>
+                {% endfor %}
+                {% for page in range(41, 51) %}
+                <div class="option-row">
+                    <a href="/exam?page={{ page }}">{{ page }}</a>
+                    <span class="option-b" id="answer-{{ page }}"></span><!-- 주관식 답 표시 -->
                 </div>
                 {% endfor %}
             </div>
@@ -78,7 +85,8 @@
         }
     }
 
-    function renderQuestions(question) {
+    function renderMulQuestions(question) {
+        console.log('renderMulQuestions:', question);
         const container = document.getElementById("questions-container");
         container.innerHTML = ""; // 기존 내용을 비웁니다.
 
@@ -90,6 +98,23 @@
                 <p class="option-a" data-id="${question.id}" data-option="2" onclick="selectOption(this)">② ${question.option2}</p>
                 <p class="option-a" data-id="${question.id}" data-option="3" onclick="selectOption(this)">③ ${question.option3}</p>
                 <p class="option-a" data-id="${question.id}" data-option="4" onclick="selectOption(this)">④ ${question.option4}</p>
+                <p class="option-a" data-id="${question.id}" data-option="5" onclick="selectOption(this)">⑤ ${question.option5}</p>
+            </div>
+                `;
+        container.appendChild(questionElement);
+        applySelectedOptions();
+    };
+
+    function renderSubQuestions(question) {
+        console.log('renderSubQuestions:', question);
+        const container = document.getElementById("questions-container");
+        container.innerHTML = ""; // 기존 내용을 비웁니다.
+
+        const questionElement = document.createElement("div");
+        questionElement.innerHTML = `
+            <h3>${question.id}. ${question.text}</h3>
+            <div class="option-a-row">
+                <input type="text" class="option-a" data-id="${question.id}" data="input" oninput="writeanswer(this)">
             </div>
                 `;
         container.appendChild(questionElement);
@@ -101,13 +126,44 @@
         const userId = getCookie('userid');
         const questionId = "{{ current_page }}";
         const question = await fetchQuestions(userId, questionId);
-        if (question) {
-            renderQuestions(question);
+
+        if (question && questionId <= 40) {
+            renderMulQuestions(question);
+        }
+        if(question && questionId > 40){
+            renderSubQuestions(question);
+        }
+
+        for (const [qId, answer] of Object.entries(selectedOptions)) {
+            const inputField = document.querySelector(`input[data-id="${questionId}"]`);
+            if (inputField) {
+                inputField.value = selectedOptions[questionId];  // 입력 필드 업데이트
+            }
+            const answerDisplay = document.getElementById(`answer-${qId}`);
+            if (answerDisplay) {
+                answerDisplay.textContent = answer;  // Right-section 업데이트
+            }
         }
     }
+    
 
     // 선택한 보기 저장하는 객체
     const selectedOptions = JSON.parse(getCookie('selectedOptions') || '{}');
+
+    function writeanswer(element) {
+    const questionId = element.getAttribute('data-id');
+    const answer = element.value;  // 입력된 값 가져오기
+
+    selectedOptions[questionId] = answer;  // 선택된 답변 저장
+    setCookie('selectedOptions', JSON.stringify(selectedOptions), 7);  // 쿠키 저장
+
+    console.log('Updated Selected Options:', selectedOptions);
+
+    const answerDisplay = document.getElementById(`answer-${questionId}`);
+    if (answerDisplay) {
+        answerDisplay.textContent = answer;  // 주관식 답 표시
+    }
+}
 
     function selectOption(element) {
         const questionId = element.getAttribute('data-id');
@@ -143,7 +199,7 @@
             window.location.href = redirectUrl;
         }
 
-        for (let id = 1; id <= 20; id++) {
+        for (let id = 1; id <= 50; id++) {
             if (!selectedOptions[id]) {
                 selectedOptions[id] = "0"; // 기본값 0
             }
@@ -151,7 +207,7 @@
 
         // 쿠키에 기본값 저장
         setCookie('selectedOptions', JSON.stringify(selectedOptions), 7);
-        
+
         applySelectedOptions();
     });
 
