@@ -135,7 +135,7 @@ def assign_questions_to_user(user_id):
             question_data["id"] = idx
             redis_client.set(f"user:{user_id}:question:{idx}", json.dumps(question_data))
             answer_list.append(json.loads(redis_client.get(key))["answer"])
-
+    print(final_question_list)
     save_user_question(user_id, final_question_list, answer_list)
     print(f"Questions assigned to user {user_id}")
 
