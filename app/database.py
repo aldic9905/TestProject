@@ -78,7 +78,7 @@ def cache_all_questions():
                 "answer": row["answer"]  # 정답
             }
         
-        redis_client.set(f"question:{row["subject"]}:{row["type"]}:{row["id"]}", json.dumps(json_obj))
+        redis_client.set(f"question:{row['subject']}:{row['type']}:{row['id']}", json.dumps(json_obj))
 
     print("Questions stored in Redis.")
 
