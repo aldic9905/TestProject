@@ -15,6 +15,13 @@ templates = Jinja2Templates(directory="app/templates")
 # 정적 파일 디렉토리 마운트
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+def clear_redis_questions():
+    keys = redis_client.keys("question:*")
+    if keys:
+        redis_client.delete(*keys)
+    print(f"Deleted {len(keys)} question:* keys from Redis")
+    
+clear_redis_questions()
 cache_all_questions()
 
 @app.get("/exam", response_class=HTMLResponse)
