@@ -12,7 +12,7 @@ def extract_questions(file_path):
     id_idx=0
     
     for sheet in sheet_names:
-        df = pd.read_excel(xls, sheet_name=sheet)
+        df = pd.read_excel(xls, sheet_name=sheet,dtype=str)
 
         # 컬럼명 표준화 (실제 컬럼명을 확인 후 수정 필요)
         df.columns = [col.strip() for col in df.columns]
@@ -31,7 +31,7 @@ def extract_questions(file_path):
             else:
                 question_type = '주관식'
             text = row['문항명']
-            answer = str(row['정답'])
+            answer = row['정답']
             difficulty = row['난이도']
             optext = row['지문']
 
